@@ -1,0 +1,139 @@
+#url /api/v1
+#type api
+#base https://w3id.org/oc/index/coci
+#title REST API for the Crossref Open Citation Index
+#description This document describe the REST API for accessing the data stored in the [Crossref Open Citation Index (COCI)](https://w3id.org/oc/index/coci), hosted by [OpenCitations](http://opencitations.net). Currently, this API implements basic operations to get citations and references of articles given a DOI, or for providing the information about a particular citation by means of its [Open Citation Identifier (OCI)](https://opencitations.wordpress.com/2018/03/12/citations-as-first-class-data-entities-open-citation-identifiers/).
+
+All the present operations returns a JSON document (default) or a CSV document according to the mimetype specified in the `Accept` header of the request. The fields returned by these operations are:
+
+* *oci*: the Open Citation Identifier (OCI) of the citation in consideration;
+* *citing*: the DOI of the citing entity;
+* *cited*: the DOI of the cited entity;
+* *creation*: the creation date of the citation according to the [ISO date format](https://en.wikipedia.org/wiki/ISO_8601) `YYYY-MM-DD`, which corresponds to the publication date of the citing entity;
+* *timespan*: the interval between the publication date of the cited entity and the publication date of the citing entity, expressed using the [XSD duration format](https://www.w3.org/TR/xmlschema11-2/#duration) `PnYnMnD`.
+
+It is possible to suggest additional operations to be included in the API by using the [issue tracker](https://github.com/opencitations/api-coci/issues) of the COCI API available on GitHub.
+#version Version 1.0.0
+#contacts [contact@opencitations.net](mailto:contact@opencitations.net)
+#license This document is licensed with a [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/legalcode), while the REST API provided have been created by means of [RAMOSE](https://github.com/opencitations/ramose), which is licensed with an [ISC license](https://opensource.org/licenses/ISC).
+#endpoint http://localhost:3000/blazegraph/sparql
+#addon cociapi
+
+#url /references/{doi}
+#type operation
+#doi str(10\..+)
+#preprocess lower(doi)
+#method get
+#description It retrieves all the works cited by the article identified by the input DOI.
+#call /references/10.1002/cbic.201500518
+#output_json [
+    {
+        "oci": "02001000002361211181237020001050000050108-02001000002361023161437020000090006060700",
+        "citing": "10.1002/cbic.201500518",
+        "cited": "10.1002/ange.200906670",
+        "creation": "2015-12-16",
+        "timespan": "P5Y5M7D"
+    },
+    {
+        "oci": "02001000002361211181237020001050000050108-02001000002361023161437020001010003050809",
+        "citing": "10.1002/cbic.201500518",
+        "cited": "10.1002/ange.201103589",
+        "creation": "2015-12-16",
+        "timespan": "P4Y3M"
+    },
+    {
+        "oci": "02001000002361211181237020001050000050108-02001000002361023181437020000090006060700",
+        "citing": "10.1002/cbic.201500518",
+        "cited": "10.1002/anie.200906670",
+        "creation": "2015-12-16",
+        "timespan": "P5Y5M4D"
+    }
+]
+#field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan)
+#sparql PREFIX cito: <http://purl.org/spar/cito/>
+SELECT ?oci ?citing ?cited ?creation ?timespan
+WHERE {
+    GRAPH <https://w3id.org/oc/index/coci/> {
+        BIND(<http://dx.doi.org/[[doi]]> as ?citing_iri) .
+        ?citing_iri ^cito:hasCitingEntity ?oci_iri .
+        ?oci_iri
+            cito:hasCitedEntity ?cited_iri ;
+            cito:hasCitationCreationDate ?creation ;
+            cito:hasCitationTimeSpan ?timespan .
+        BIND(STRAFTER(str(?citing_iri), "http://dx.doi.org/") AS ?citing)
+        BIND(STRAFTER(str(?cited_iri), "http://dx.doi.org/") AS ?cited)
+        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
+    }
+}
+LIMIT 10000
+
+#url /citations/{doi}
+#type operation
+#doi str(10\..+)
+#preprocess lower(doi)
+#method get
+#description It retrieves all the citations received by the article identified by the input DOI.
+#call /citations/10.1002/cbic.201500518
+#output_json [
+    {
+        "oci": "020010000023625142502370204000502-02001000002361211181237020001050000050108",
+        "citing": "10.1002/pep2.24052",
+        "cited": "10.1002/cbic.201500518",
+        "creation": "2018-02-23",
+        "timespan": "P2Y2M7D"
+    }
+]
+#field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan)
+#sparql PREFIX cito: <http://purl.org/spar/cito/>
+SELECT ?oci ?citing ?cited ?creation ?timespan
+WHERE {
+    GRAPH <https://w3id.org/oc/index/coci/> {
+        BIND(<http://dx.doi.org/[[doi]]> as ?cited_iri) .
+        ?cited_iri ^cito:hasCitedEntity ?oci_iri .
+        ?oci_iri
+            cito:hasCitingEntity ?citing_iri ;
+            cito:hasCitationCreationDate ?creation ;
+            cito:hasCitationTimeSpan ?timespan .
+        BIND(STRAFTER(str(?citing_iri), "http://dx.doi.org/") AS ?citing)
+        BIND(STRAFTER(str(?cited_iri), "http://dx.doi.org/") AS ?cited)
+        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
+    }
+}
+LIMIT 10000
+
+#url /citation/{oci}
+#type operation
+#oci str([0-9]+-[0-9]+)
+#method get
+#description It retrieves all the information of the citation identified by the input Open Citation Identifier, or OCI.
+
+The Open Citation Identifier is a globally unique persistent identifier for bibliographic citations, which has a simple structure: the lower-case letters "oci" followed by a colon, followed by two numbers separated by a dash. For example, `oci:1-18` is a valid OCI.
+
+It is worth mentioning that, in this REST operation, the prefix "oci:" **must not** be specified, and only the dash-separated numbers of the OCI are actually needed.
+#call /citation/02001000002361211181237020001050000050108-0200302030336191013630200010263010209000001
+#output_json [
+    {
+        "oci": "02001000002361211181237020001050000050108-0200302030336191013630200010263010209000001",
+        "citing": "10.1002/cbic.201500518",
+        "cited": "10.3233/jad-2012-129001",
+        "creation": "2015-12-16",
+        "timespan": "P2Y11M29D"
+    }
+]
+#field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan)
+#sparql PREFIX cito: <http://purl.org/spar/cito/>
+SELECT ?oci ?citing ?cited ?creation ?timespan
+WHERE {
+    GRAPH <https://w3id.org/oc/index/coci/> {
+        BIND(<https://w3id.org/oc/index/coci/ci/[[oci]]> as ?oci_iri) .
+        ?oci_iri
+            cito:hasCitingEntity ?citing_iri ;
+            cito:hasCitedEntity ?cited_iri ;
+            cito:hasCitationCreationDate ?creation ;
+            cito:hasCitationTimeSpan ?timespan .
+        BIND(STRAFTER(str(?citing_iri), "http://dx.doi.org/") AS ?citing)
+        BIND(STRAFTER(str(?cited_iri), "http://dx.doi.org/") AS ?cited)
+        BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
+    }
+}
+LIMIT 10000
