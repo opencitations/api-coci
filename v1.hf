@@ -16,37 +16,45 @@ It is possible to suggest additional operations to be included in the API by usi
 #version Version 1.0.0
 #contacts [contact@opencitations.net](mailto:contact@opencitations.net)
 #license This document is licensed with a [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/legalcode), while the REST API provided have been created by means of [RAMOSE](https://github.com/opencitations/ramose), which is licensed with an [ISC license](https://opensource.org/licenses/ISC).
-#endpoint http://localhost:3000/blazegraph/sparql
+#endpoint https://w3id.org/oc/index/coci/sparql
 #addon cociapi
 
 #url /references/{doi}
 #type operation
 #doi str(10\..+)
-#preprocess lower(doi)
+#preprocess lower(doi) --> encode(doi)
+#postprocess decode_doi(citing, cited)
 #method get
 #description It retrieves all the works cited by the article identified by the input DOI.
-#call /references/10.1002/cbic.201500518
+#call /references/10.1186/1756-8722-6-59
 #output_json [
     {
-        "oci": "02001000002361211181237020001050000050108-02001000002361023161437020000090006060700",
-        "citing": "10.1002/cbic.201500518",
-        "cited": "10.1002/ange.200906670",
-        "creation": "2015-12-16",
-        "timespan": "P5Y5M7D"
+        "oci": "02001010806360107050663080702026306630509-0200101080636102703040309",
+        "citing": "10.1186/1756-8722-6-59",
+        "cited": "10.1186/ar3439",
+        "creation": "2013",
+        "timespan": "P2Y"
     },
     {
-        "oci": "02001000002361211181237020001050000050108-02001000002361023161437020001010003050809",
-        "citing": "10.1002/cbic.201500518",
-        "cited": "10.1002/ange.201103589",
-        "creation": "2015-12-16",
-        "timespan": "P4Y3M"
+        "oci": "02001010806360107050663080702026306630509-0200101080636102704000806",
+        "citing": "10.1186/1756-8722-6-59",
+        "cited": "10.1186/ar4086",
+        "creation": "2013",
+        "timespan": "P1Y"
     },
     {
-        "oci": "02001000002361211181237020001050000050108-02001000002361023181437020000090006060700",
-        "citing": "10.1002/cbic.201500518",
-        "cited": "10.1002/anie.200906670",
-        "creation": "2015-12-16",
-        "timespan": "P5Y5M4D"
+        "oci": "02001010806360107050663080702026306630509-020010200003619122437020001023704023707090006",
+        "citing": "10.1186/1756-8722-6-59",
+        "cited": "10.1200/jco.2012.42.7906",
+        "creation": "2013",
+        "timespan": "P0Y"
+    },
+    {
+        "oci": "02001010806360107050663080702026306630509-02003010009360008080300010805370200010237060604070907",
+        "citing": "10.1186/1756-8722-6-59",
+        "cited": "10.3109/08830185.2012.664797",
+        "creation": "2013",
+        "timespan": "P0Y"
     }
 ]
 #field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan)
@@ -70,17 +78,18 @@ LIMIT 10000
 #url /citations/{doi}
 #type operation
 #doi str(10\..+)
-#preprocess lower(doi)
+#preprocess lower(doi) --> encode(doi)
+#postprocess decode_doi(citing, cited)
 #method get
 #description It retrieves all the citations received by the article identified by the input DOI.
-#call /citations/10.1002/cbic.201500518
+#call /citations/10.1186/1756-8722-5-31
 #output_json [
     {
-        "oci": "020010000023625142502370204000502-02001000002361211181237020001050000050108",
-        "citing": "10.1002/pep2.24052",
-        "cited": "10.1002/cbic.201500518",
-        "creation": "2018-02-23",
-        "timespan": "P2Y2M7D"
+        "oci": "02001010806360107050663080702026306630509-02001010806360107050663080702026305630301",
+        "citing": "10.1186/1756-8722-6-59",
+        "cited": "10.1186/1756-8722-5-31",
+        "creation": "2013",
+        "timespan": "P1Y"
     }
 ]
 #field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan)
@@ -105,19 +114,20 @@ LIMIT 10000
 #type operation
 #oci str([0-9]+-[0-9]+)
 #method get
+#postprocess decode_doi(citing, cited)
 #description It retrieves all the information of the citation identified by the input Open Citation Identifier, or OCI.
 
 The Open Citation Identifier is a globally unique persistent identifier for bibliographic citations, which has a simple structure: the lower-case letters "oci" followed by a colon, followed by two numbers separated by a dash. For example, `oci:1-18` is a valid OCI.
 
 It is worth mentioning that, in this REST operation, the prefix "oci:" **must not** be specified, and only the dash-separated numbers of the OCI are actually needed.
-#call /citation/02001000002361211181237020001050000050108-0200302030336191013630200010263010209000001
+#call /citation/02001010806360107050663080702026306630509-0200101080636102704000806
 #output_json [
     {
-        "oci": "02001000002361211181237020001050000050108-0200302030336191013630200010263010209000001",
-        "citing": "10.1002/cbic.201500518",
-        "cited": "10.3233/jad-2012-129001",
-        "creation": "2015-12-16",
-        "timespan": "P2Y11M29D"
+        "oci": "02001010806360107050663080702026306630509-0200101080636102704000806",
+        "citing": "10.1186/1756-8722-6-59",
+        "cited": "10.1186/ar4086",
+        "creation": "2013",
+        "timespan": "P1Y"
     }
 ]
 #field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan)
