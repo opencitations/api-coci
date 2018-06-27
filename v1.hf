@@ -2,7 +2,7 @@
 #type api
 #base https://w3id.org/oc/index/coci
 #title REST API for the Crossref Open Citation Index
-#description This document describe the REST API for accessing the data stored in the [Crossref Open Citation Index (COCI)](https://w3id.org/oc/index/coci) hosted by [OpenCitations](http://opencitations.net). Currently, this API implements basic operations to retrieve citation data for all the incoming citations from other articles, or citation data for all the outgoing citations to other articles, given the DOI of a bibliographic entity, or to retrieve citation data about a particular citation identified by means of its [Open Citation Identifier (OCI)](https://opencitations.wordpress.com/2018/03/12/citations-as-first-class-data-entities-open-citation-identifiers/).
+#description This document describe the REST API for accessing the data stored in the [Crossref Open Citation Index (COCI)](https://w3id.org/oc/index/coci) hosted by [OpenCitations](http://opencitations.net). Currently, this API implements three basic operations, to retrieve the citation data for all the references to other works appearing in a particular bibliographic entity, or the citation data for all the references appearing in other works to a particular bibliographic entity, given the DOI of a bibliographic entity, or to retrieve citation data about a particular citation identified by means of its [Open Citation Identifier (OCI)](https://opencitations.wordpress.com/2018/03/12/citations-as-first-class-data-entities-open-citation-identifiers/).
 
 All the present operations return either a JSON document (default) or a CSV document according to the mimetype specified in the `Accept` header of the request. The fields returned by these operations are:
 
@@ -25,7 +25,7 @@ If you would like to suggest an additional operation to be included in this API,
 #preprocess lower(doi) --> encode(doi)
 #postprocess decode_doi(citing, cited)
 #method get
-#description This operation retrieves citation data for all the references to other works appearing in the article identified by the input DOI.
+#description This operation retrieves the citation data for all the references to other works appearing in the bibliographic entity identified by the input DOI.
 #call /references/10.1186/1756-8722-6-59
 #output_json [
     {
@@ -81,7 +81,7 @@ LIMIT 10000
 #preprocess lower(doi) --> encode(doi)
 #postprocess decode_doi(citing, cited)
 #method get
-#description This operation retrieves citation data for all the references made in other works to the article identified by the input DOI.
+#description This operation retrieves the citation data for all the references appearing in other works to the bibliographic entityidentified by the input DOI.
 #call /citations/10.1186/1756-8722-5-31
 #output_json [
     {
