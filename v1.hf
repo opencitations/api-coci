@@ -81,7 +81,7 @@ LIMIT 10000
 #preprocess lower(doi) --> encode(doi)
 #postprocess decode_doi(citing, cited)
 #method get
-#description This operation retrieves the citation data for all the references appearing in other works to the bibliographic entityidentified by the input DOI.
+#description This operation retrieves the citation data for all the references appearing in other works to the bibliographic entity identified by the input DOI.
 #call /citations/10.1186/1756-8722-5-31
 #output_json [
     {
