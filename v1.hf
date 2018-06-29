@@ -82,14 +82,28 @@ LIMIT 10000
 #postprocess decode_doi(citing, cited)
 #method get
 #description This operation retrieves the citation data for all the references appearing in other works to the bibliographic entity identified by the input DOI.
-#call /citations/10.1186/1756-8722-5-31
+#call /citations/10.1002/adfm.201505328
 #output_json [
     {
-        "oci": "02001010806360107050663080702026306630509-02001010806360107050663080702026305630301",
-        "citing": "10.1186/1756-8722-6-59",
-        "cited": "10.1186/1756-8722-5-31",
-        "creation": "2013",
-        "timespan": "P1Y"
+        "oci": "0200100030836231029271431221029283702000106370908-02001000002361013152237020001050005030208",
+        "citing": "10.1038/natrevmats.2016.98",
+        "cited": "10.1002/adfm.201505328",
+        "creation": "2017-01-17",
+        "timespan": "P11M"
+    },
+    {
+        "oci": "02001000002361013221037020001070002060708-02001000002361013152237020001050005030208",
+        "citing": "10.1002/adma.201702678",
+        "cited": "10.1002/adfm.201505328",
+        "creation": "2017-07-25",
+        "timespan": "P1Y5M8D"
+    },
+    {
+        "oci": "020010003083623142314271634370200010737010005-02001000002361013152237020001050005030208",
+        "citing": "10.1038/nenergy.2017.105",
+        "cited": "10.1002/adfm.201505328",
+        "creation": "2017-07-10",
+        "timespan": "P1Y4M23D"
     }
 ]
 #field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan)
