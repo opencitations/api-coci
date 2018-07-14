@@ -1,8 +1,8 @@
 #url /api/v1
 #type api
 #base https://w3id.org/oc/index/coci
-#title REST API for the Crossref Open Citation Index
-#description This document describe the REST API for accessing the data stored in the [Crossref Open Citation Index (COCI)](https://w3id.org/oc/index/coci) hosted by [OpenCitations](http://opencitations.net). Currently, this API implements three basic operations, to retrieve the citation data for all the references to other works appearing in a particular bibliographic entity, or the citation data for all the references appearing in other works to a particular bibliographic entity, given the DOI of a bibliographic entity, or to retrieve citation data about a particular citation identified by means of its [Open Citation Identifier (OCI)](https://opencitations.wordpress.com/2018/03/12/citations-as-first-class-data-entities-open-citation-identifiers/).
+#title REST API for COCI, the OpenCitations Index of Crossref open DOI-to-DOI references
+#description This document describe the REST API for accessing the data stored in [COCI](https://w3id.org/oc/index/coci) hosted by [OpenCitations](http://opencitations.net). Currently, this API implements three basic operations, to retrieve the citation data for all the references to other works appearing in a particular bibliographic entity, or the citation data for all the references appearing in other works to a particular bibliographic entity, given the DOI of a bibliographic entity, or to retrieve citation data about a particular citation identified by means of its [Open Citation Identifier (OCI)](https://opencitations.wordpress.com/2018/03/12/citations-as-first-class-data-entities-open-citation-identifiers/).
 
 All the present operations return either a JSON document (default) or a CSV document according to the mimetype specified in the `Accept` header of the request. The fields returned by these operations are:
 
