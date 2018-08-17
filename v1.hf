@@ -19,7 +19,7 @@ All the present operations return either a JSON document (default) or a CSV docu
 #method get
 #description This operation retrieves the citation data for all the references to other works appearing in the bibliographic entity identified by the input DOI.
 
-The fields returned by these operations are:
+The fields returned by this operation are:
 
 * *oci*: the Open Citation Identifier (OCI) of the citation in consideration;
 * *citing*: the DOI of the citing entity;
@@ -83,7 +83,7 @@ LIMIT 10000
 #method get
 #description This operation retrieves the citation data for all the references appearing in other works to the bibliographic entity identified by the input DOI.
 
-The fields returned by these operations are:
+The fields returned by this operation are:
 
 * *oci*: the Open Citation Identifier (OCI) of the citation in consideration;
 * *citing*: the DOI of the citing entity;
@@ -143,7 +143,7 @@ The Open Citation Identifier is a globally unique persistent identifier for bibl
 
 It is worth mentioning that, in this REST operation, the prefix "oci:" **should not** be specified, and only the dash-separated numbers of the OCI should be provided, as shown in the example below.
 
-The fields returned by these operations are:
+The fields returned by this operation are:
 
 * *oci*: the Open Citation Identifier (OCI) of the citation in consideration;
 * *citing*: the DOI of the citing entity;
