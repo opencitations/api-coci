@@ -19,7 +19,7 @@ from urllib.parse import quote, unquote
 from requests import get
 from rdflib import Graph, URIRef
 from rdflib.namespace import RDF, OWL, Namespace
-from pprint import pprint
+from re import sub
 
 
 def lower(s):
@@ -51,7 +51,7 @@ def split_dois(s):
 
 def metadata(res, *args):
     base_api_url = "https://doi.org/"
-    rdf_format = "text/turtle"
+    rdf_format = "application/rdf+xml"
 
     # doi, reference, citation_count
     header = res[0]
@@ -74,7 +74,8 @@ def metadata(res, *args):
                 __add_data(row, g, additional_fields)
             else:
                 row.extend([""] * len(additional_fields))  # empty list
-        except:
+        except Exception as e:
+            raise e
             row.extend([""] * len(additional_fields))  # empty list
 
     return res
