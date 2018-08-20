@@ -182,13 +182,13 @@ LIMIT 10000
 #type operation
 #dois str(\"?10\..+[^_\"]((__|\" \")10\..+[^_])*\"?)
 #preprocess lower(dois) --> encode(dois) --> split_dois(dois)
-#postprocess metadata() --> decode_doi(doi, reference)
+#postprocess metadata() --> oalink() --> decode_doi(doi, reference)
 #method get
 #description This operation retrieves the metadata for all the articles identified by the input DOIs.
 
 It is possible to specify one or more DOIs as input of this operation. In this case, the DOI should be separated with a double underscore ("\_\_") – e.g. "10.1108/jd-12-2013-0166\_\_10.1016/j.websem.2012.08.001\_\_...". The fields returned by this operation are:
 
-* *author*: the semicolon-separated list of authors of the citing entity, ordered by name;
+* *author*: the semicolon-separated list of authors of the citing entity;
 * *year*: the year of publication of the citing entity;
 * *title*: the title of the citing entity;
 * *source_title*: the title of the venue where the citing entity has been published;
@@ -197,7 +197,8 @@ It is possible to specify one or more DOIs as input of this operation. In this c
 * *page*: the starting and ending pages of the citing entity in the context of the venue where it has been published;
 * *doi*: the DOI of the citing entity;
 * *reference*: the semicolon-separated DOIs of all the entities cited by the citing ;
-* *citation_count*: the number of citations received by the citing entity.
+* *citation_count*: the number of citations received by the citing entity;
+* *oa_link*: the link to the Open Access version of the citing entity, if available.
 
 Note: this operation strictly depends on external services (i.e. doi.org and associate applications) for gathering all the metadata of the articles requested. In fact, these metadata are not stored in COCI and are retrieved dynamically upon request.
 #call /metadata/10.1108/jd-12-2013-0166__10.6084/m9.figshare.3443876
