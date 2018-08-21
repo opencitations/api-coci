@@ -94,7 +94,7 @@ def __crossref_parser(doi):
                             if "given" in author:
                                 author_string += ", " + author["given"]
                                 if "ORCID" in author:
-                                    author_string += ", " + author["ORCID"]
+                                    author_string += ", " + author["ORCID"].replace("http://orcid.org/", "")
                         if author_string is not None:
                             authors.append(author_string)
 
