@@ -90,9 +90,9 @@ def __crossref_parser(doi):
                     for author in body["author"]:
                         author_string = None
                         if "family" in author:
-                            author_string = author["family"]
+                            author_string = author["family"].title()
                             if "given" in author:
-                                author_string += ", " + author["given"]
+                                author_string += ", " + author["given"].title()
                                 if "ORCID" in author:
                                     author_string += ", " + author["ORCID"].replace("http://orcid.org/", "")
                         if author_string is not None:
@@ -105,11 +105,11 @@ def __crossref_parser(doi):
 
                 title = ""
                 if "title" in body:
-                    title = body["title"][0]
+                    title = body["title"][0].title()
 
                 source_title = ""
                 if "container-title" in body:
-                    source_title = body["container-title"][0]
+                    source_title = body["container-title"][0].title()
 
                 volume = ""
                 if "volume" in body:
