@@ -9,6 +9,7 @@ All the present operations return either a JSON document (default) or a CSV docu
 #contacts [contact@opencitations.net](mailto:contact@opencitations.net)
 #license This document is licensed with a [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/legalcode), while the REST API itself has been created using [RAMOSE](https://github.com/opencitations/ramose), the *Restful API Manager Over SPARQL Endpoints* created by [Silvio Peroni](https://orcid.org/0000-0003-0530-4305), which is licensed with an [ISC license](https://opensource.org/licenses/ISC).
 #endpoint http://opencitations.net/index/coci/sparql
+#method post
 #addon cociapi
 
 #url /references/{doi}
@@ -192,6 +193,7 @@ It is possible to specify one or more DOIs as input of this operation. In this c
 * *year*: the year of publication of the citing entity;
 * *title*: the title of the citing entity;
 * *source_title*: the title of the venue where the citing entity has been published;
+* *source_id*: the semicolon-separated list of identifiers referring to the source where the citing entity has been published;
 * *volume*: the number of the volume in which the citing entity has been published;
 * *issue*: the number of the issue in which the citing entity has been published;
 * *page*: the starting and ending pages of the citing entity in the context of the venue where it has been published;
@@ -202,7 +204,7 @@ It is possible to specify one or more DOIs as input of this operation. In this c
 
 Note: this operation strictly depends on external services (i.e. doi.org and associate applications) for gathering all the metadata of the articles requested. In fact, these metadata are not stored in COCI and are retrieved dynamically upon request.
 #call /metadata/10.1108/jd-12-2013-0166__10.6084/m9.figshare.3443876
-#field_type str(author) datetime(year) str(title) str(source_title) str(volume) str(issue) str(page) str(doi) str(reference) int(citation_count)
+#field_type str(author) datetime(year) str(title) str(source_title) str(source_id) str(volume) str(issue) str(page) str(doi) str(reference) int(citation_count)
 #output_json [
     {
         "doi": "10.1108/jd-12-2013-0166",
@@ -212,6 +214,7 @@ Note: this operation strictly depends on external services (i.e. doi.org and ass
         "year": "2015",
         "title": "Setting our bibliographic references free: towards open citation data",
         "source_title": "Journal of Documentation",
+        "source_id": "issn:0022-0418",
         "volume": "71",
         "issue": "",
         "page": "253-277"
@@ -224,6 +227,7 @@ Note: this operation strictly depends on external services (i.e. doi.org and ass
         "year": "2018",
         "title": "The OpenCitations Data Model",
         "source_title": "",
+        "source_id": "",
         "volume": "",
         "issue": "",
         "page": ""

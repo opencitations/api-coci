@@ -53,7 +53,7 @@ def metadata(res, *args):
     # doi, reference, citation_count
     header = res[0]
     doi_field = header.index("doi")
-    additional_fields = ["author", "year", "title", "source_title", "volume", "issue", "page"]
+    additional_fields = ["author", "year", "title", "source_title", "volume", "issue", "page", "source_id"]
 
     header.extend(additional_fields)
 
@@ -71,6 +71,28 @@ def metadata(res, *args):
             row.extend(r)
 
     return res
+
+
+def __get_issn(body):
+    cur_id = ""
+    if "ISSN" in body and len(body["ISSN"]):
+        cur_id = "; ".join("issn:" + cur_issn for cur_issn in body["ISSN"])
+    return cur_id
+
+
+def __get_isbn(body):
+    cur_id = ""
+    if "ISBN" in body and len(body["ISBN"]):
+        cur_id = "; ".join("isbn:" + cur_issn for cur_issn in body["ISBN"])
+    return cur_id
+
+
+def __get_id(body, f_list):
+    cur_id = ""
+    for f in f_list:
+        if cur_id == "":
+            cur_id = f(body)
+    return cur_id
 
 
 def __crossref_parser(doi):
@@ -123,7 +145,16 @@ def __crossref_parser(doi):
                 if "page" in body:
                     page = body["page"]
 
-                return ["; ".join(authors), year, title, source_title, volume, issue, page]
+                source_id = ""
+                if "type" in body:
+                    if body["type"] == "book-chapter":
+                        source_id = __get_isbn(body)
+                    else:
+                        source_id = __get_issn(body)
+                else:
+                    source_id = __get_id(body, [__get_issn, __get_isbn])
+
+                return ["; ".join(authors), year, title, source_title, volume, issue, page, source_id]
 
     except Exception as e:
         pass  # do nothing
@@ -143,7 +174,7 @@ def __datacite_parser(doi):
             g.parse(data=r.text, format=rdf_format)
             res = list(g.query("""
                 PREFIX schema: <http://schema.org/>
-                SELECT DISTINCT ?author ?year ?title ?source_title ?volume ?issue ?page
+                SELECT DISTINCT ?author ?year ?title ?source_title ?volume ?issue ?page ?source_id
                 WHERE {
                     ?article a schema:ScholarlyArticle .
                     
