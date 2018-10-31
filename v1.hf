@@ -183,32 +183,34 @@ LIMIT 10000
 #type operation
 #dois str(\"?10\..+[^_\"]((__|\" \")10\..+[^_])*\"?)
 #preprocess lower(dois) --> encode(dois) --> split_dois(dois)
-#postprocess metadata() --> oalink() --> decode_doi(doi, reference)
+#postprocess metadata() --> oalink() --> decode_doi(doi, reference, citation)
 #method get
 #description This operation retrieves the metadata for all the articles identified by the input DOIs.
 
 It is possible to specify one or more DOIs as input of this operation. In this case, the DOI should be separated with a double underscore ("\_\_") – e.g. "10.1108/jd-12-2013-0166\_\_10.1016/j.websem.2012.08.001\_\_...". The fields returned by this operation are:
 
-* *author*: the semicolon-separated list of authors of the citing entity;
-* *year*: the year of publication of the citing entity;
-* *title*: the title of the citing entity;
-* *source_title*: the title of the venue where the citing entity has been published;
-* *source_id*: the semicolon-separated list of identifiers referring to the source where the citing entity has been published;
-* *volume*: the number of the volume in which the citing entity has been published;
-* *issue*: the number of the issue in which the citing entity has been published;
-* *page*: the starting and ending pages of the citing entity in the context of the venue where it has been published;
-* *doi*: the DOI of the citing entity;
-* *reference*: the semicolon-separated DOIs of all the entities cited by the citing ;
-* *citation_count*: the number of citations received by the citing entity;
-* *oa_link*: the link to the Open Access version of the citing entity, if available.
+* *author*: the semicolon-separated list of authors of the bibliographic entity;
+* *year*: the year of publication of the bibliographic entity;
+* *title*: the title of the bibliographic entity;
+* *source_title*: the title of the venue where the bibliographic entity has been published;
+* *source_id*: the semicolon-separated list of identifiers referring to the source where the bibliographic entity has been published;
+* *volume*: the number of the volume in which the bibliographic entity has been published;
+* *issue*: the number of the issue in which the bibliographic entity has been published;
+* *page*: the starting and ending pages of the bibliographic entity in the context of the venue where it has been published;
+* *doi*: the DOI of the bibliographic entity;
+* *reference*: the semicolon-separated DOIs of all the entities cited by the bibliographic entity;
+* *citation*: the semicolon-separated DOIs of all the entities that cite the bibliographic entity;
+* *citation_count*: the number of citations received by the bibliographic entity;
+* *oa_link*: the link to the Open Access version of the bibliographic entity, if available.
 
 Note: this operation strictly depends on external services (i.e. doi.org and associate applications) for gathering all the metadata of the articles requested. In fact, these metadata are not stored in COCI and are retrieved dynamically upon request.
 #call /metadata/10.1108/jd-12-2013-0166__10.6084/m9.figshare.3443876
-#field_type str(author) datetime(year) str(title) str(source_title) str(source_id) str(volume) str(issue) str(page) str(doi) str(reference) int(citation_count)
+#field_type str(author) datetime(year) str(title) str(source_title) str(source_id) str(volume) str(issue) str(page) str(doi) str(reference) str(citation) int(citation_count) str(oa_link)
 #output_json [
     {
         "doi": "10.1108/jd-12-2013-0166",
         "citation_count": "7",
+        "citation": "10.1177/0961000615616450; 10.1057/s41275-017-0070-x; 10.1007/978-3-319-73165-0_24; 10.1093/bib/bbx057; 10.1007/978-3-319-68204-4_19; 10.1007/978-3-319-58694-6_23; 10.3233/sw-160224",
         "reference": "10.1001/jama.295.1.90; 10.1002/asi.4630240406; 10.1002/(sici)1097-4571(198909)40:5<342::aid-asi7>3.0.co;2-u; 10.1007/bf02457980; 10.1007/s10579-012-9211-2; 10.1007/s11192-009-0021-2; 10.1016/j.websem.2012.08.001; 10.1016/j.websem.2013.05.001; 10.1023/a:1021919228368; 10.1038/35079151; 10.1038/495437a; 10.1038/502295a; 10.1038/502298a; 10.1042/bj20091474; 10.1073/pnas.0407743101; 10.1087/2009202; 10.1101/sqb.1972.036.01.015; 10.1108/eum0000000007123; 10.1108/jd-07-2012-0082; 10.1126/science.149.3683.510; 10.1136/bmj.a568; 10.1136/bmj.b2680; 10.1145/1498765.1498780; 10.1177/030631277400400102; 10.1177/030631277500500106; 10.1371/journal.pcbi.0010034; 10.1371/journal.pcbi.1000361; 10.1371/journal.pntd.0000228; 10.1371/journal.pone.0000308; 10.1523/jneurosci.0003-08.2008; 10.1525/bio.2010.60.5.2; 10.3115/1610075.1610091; 10.5210/fm.v2i4.522; 10.5539/ass.v9n5p18; 10.7717/peerj.175",
         "author": "Dutton, Alexander; Gray, Tanya; Peroni, Silvio; Shotton, David",
         "year": "2015",
@@ -222,6 +224,7 @@ Note: this operation strictly depends on external services (i.e. doi.org and ass
     {
         "doi": "10.6084/m9.figshare.3443876",
         "citation_count": "0",
+        "citation": "",
         "reference": "",
         "author": "Peroni, Silvio, 0000-0003-0530-4305; Shotton, David, 0000-0001-5506-523X",
         "year": "2018",
@@ -234,7 +237,7 @@ Note: this operation strictly depends on external services (i.e. doi.org and ass
     }
 ]
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT DISTINCT ?doi ?citation_count (GROUP_CONCAT(?cited_doi; separator="; ") as ?reference)
+SELECT DISTINCT ?doi ?citation_count ?citation (GROUP_CONCAT(?cited_doi; separator="; ") as ?reference)
 WHERE {
 	VALUES ?doi { [[dois]] }
 	BIND(IRI(CONCAT("http://dx.doi.org/", ?doi)) as ?citing)
@@ -247,13 +250,15 @@ WHERE {
 	BIND(SUBSTR(str(?date), 0, 4) as ?year)
 
 	OPTIONAL {
-	    SELECT ?citing (count(?citation) as ?c_count) {
+	    SELECT ?citing (count(?c) as ?c_count) (GROUP_CONCAT(?citing_source; separator="; ") as ?citation) {
 	        VALUES ?doi { [[dois]] }
 	        BIND(IRI(CONCAT("http://dx.doi.org/", ?doi)) as ?citing)
-	        ?citing ^cito:hasCitedEntity ?citation
+	        ?citing ^cito:hasCitedEntity ?c .
+      		?c cito:hasCitingEntity ?source .
+      		BIND(STRAFTER(str(?source), "http://dx.doi.org/") as ?citing_source)
 	    } GROUP BY ?citing
 	}
 	BIND(IF(bound(?c_count), ?c_count, 0) as ?citation_count)
 
-} GROUP BY ?doi ?citation_count
+} GROUP BY ?doi ?citation_count ?citation
 LIMIT 10000
