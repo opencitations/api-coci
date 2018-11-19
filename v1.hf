@@ -200,7 +200,9 @@ The fields returned by this operation are:
         "citing": "10.1186/1756-8722-6-59",
         "cited": "10.1186/ar4086",
         "creation": "2013",
-        "timespan": "P1Y"
+        "timespan": "P1Y",
+        "journal_sc": "no",
+        "author_sc": "no"
     }
 ]
 #field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
