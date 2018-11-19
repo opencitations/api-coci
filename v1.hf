@@ -5,7 +5,7 @@
 #description This document describe the REST API for accessing the data stored in [COCI](https://w3id.org/oc/index/coci) hosted by [OpenCitations](http://opencitations.net). Currently, this API implements three basic operations, to retrieve the citation data for all the references to other works appearing in a particular bibliographic entity, or the citation data for all the references appearing in other works to a particular bibliographic entity, given the DOI of a bibliographic entity, or to retrieve citation data about a particular citation identified by means of its [Open Citation Identifier (OCI)](https://opencitations.wordpress.com/2018/03/12/citations-as-first-class-data-entities-open-citation-identifiers/).
 
 All the present operations return either a JSON document (default) or a CSV document according to the mimetype specified in the `Accept` header of the request. If you would like to suggest an additional operation to be included in this API, please use the [issue tracker](https://github.com/opencitations/api-coci/issues) of the COCI API available on GitHub.
-#version Version 1.1.0
+#version Version 1.2.0 (2018-11-19)
 #contacts [contact@opencitations.net](mailto:contact@opencitations.net)
 #license This document is licensed with a [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/legalcode), while the REST API itself has been created using [RAMOSE](https://github.com/opencitations/ramose), the *Restful API Manager Over SPARQL Endpoints* created by [Silvio Peroni](https://orcid.org/0000-0003-0530-4305), which is licensed with an [ISC license](https://opensource.org/licenses/ISC).
 #endpoint http://opencitations.net/index/coci/sparql
@@ -26,7 +26,9 @@ The fields returned by this operation are:
 * *citing*: the DOI of the citing entity;
 * *cited*: the DOI of the cited entity;
 * *creation*: the creation date of the citation according to the [ISO date format](https://en.wikipedia.org/wiki/ISO_8601) `YYYY-MM-DD`, which corresponds to the publication date of the citing entity;
-* *timespan*: the interval between the publication date of the cited entity and the publication date of the citing entity, expressed using the [XSD duration format](https://www.w3.org/TR/xmlschema11-2/#duration) `PnYnMnD`.
+* *timespan*: the interval between the publication date of the cited entity and the publication date of the citing entity, expressed using the [XSD duration format](https://www.w3.org/TR/xmlschema11-2/#duration) `PnYnMnD`;
+* *journal_sc*: it records whether the citation is a journal self-citations (i.e. the citing and the cited entities are published in the same journal);
+* *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
 #call /references/10.1186/1756-8722-6-59
 #output_json [
     {
@@ -34,33 +36,41 @@ The fields returned by this operation are:
         "citing": "10.1186/1756-8722-6-59",
         "cited": "10.1186/ar3439",
         "creation": "2013",
-        "timespan": "P2Y"
+        "timespan": "P2Y",
+        "journal_sc": "no",
+        "author_sc": "no"
     },
     {
         "oci": "02001010806360107050663080702026306630509-0200101080636102704000806",
         "citing": "10.1186/1756-8722-6-59",
         "cited": "10.1186/ar4086",
         "creation": "2013",
-        "timespan": "P1Y"
+        "timespan": "P1Y",
+        "journal_sc": "no",
+        "author_sc": "no"
     },
     {
         "oci": "02001010806360107050663080702026306630509-020010200003619122437020001023704023707090006",
         "citing": "10.1186/1756-8722-6-59",
         "cited": "10.1200/jco.2012.42.7906",
         "creation": "2013",
-        "timespan": "P0Y"
+        "timespan": "P0Y",
+        "journal_sc": "no",
+        "author_sc": "no"
     },
     {
         "oci": "02001010806360107050663080702026306630509-02003010009360008080300010805370200010237060604070907",
         "citing": "10.1186/1756-8722-6-59",
         "cited": "10.3109/08830185.2012.664797",
         "creation": "2013",
-        "timespan": "P0Y"
+        "timespan": "P0Y",
+        "journal_sc": "no",
+        "author_sc": "no"
     }
 ]
-#field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan)
+#field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT ?oci ?citing ?cited ?creation ?timespan
+SELECT ?oci ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
 WHERE {
     GRAPH <https://w3id.org/oc/index/coci/> {
         BIND(<http://dx.doi.org/[[doi]]> as ?citing_iri) .
@@ -69,6 +79,17 @@ WHERE {
             cito:hasCitedEntity ?cited_iri ;
             cito:hasCitationCreationDate ?creation ;
             cito:hasCitationTimeSpan ?timespan .
+
+        OPTIONAL {
+            ?oci_iri a cito:JournalSelfCitation .
+            BIND("yes" as ?jsc)
+        }
+
+        OPTIONAL {
+            ?oci_iri a cito:AuthorSelfCitation .
+            BIND("yes" as ?asc)
+        }
+
         BIND(STRAFTER(str(?citing_iri), "http://dx.doi.org/") AS ?citing)
         BIND(STRAFTER(str(?cited_iri), "http://dx.doi.org/") AS ?cited)
         BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
@@ -90,7 +111,9 @@ The fields returned by this operation are:
 * *citing*: the DOI of the citing entity;
 * *cited*: the DOI of the cited entity;
 * *creation*: the creation date of the citation according to the [ISO date format](https://en.wikipedia.org/wiki/ISO_8601) `YYYY-MM-DD`, which corresponds to the publication date of the citing entity;
-* *timespan*: the interval between the publication date of the cited entity and the publication date of the citing entity, expressed using the [XSD duration format](https://www.w3.org/TR/xmlschema11-2/#duration) `PnYnMnD`.
+* *timespan*: the interval between the publication date of the cited entity and the publication date of the citing entity, expressed using the [XSD duration format](https://www.w3.org/TR/xmlschema11-2/#duration) `PnYnMnD`;
+* *journal_sc*: it records whether the citation is a journal self-citations (i.e. the citing and the cited entities are published in the same journal);
+* *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
 #call /citations/10.1002/adfm.201505328
 #output_json [
     {
@@ -99,6 +122,8 @@ The fields returned by this operation are:
         "cited": "10.1002/adfm.201505328",
         "creation": "2017-01-17",
         "timespan": "P11M"
+        "journal_sc": "no",
+        "author_sc": "no"
     },
     {
         "oci": "02001000002361013221037020001070002060708-02001000002361013152237020001050005030208",
@@ -106,6 +131,8 @@ The fields returned by this operation are:
         "cited": "10.1002/adfm.201505328",
         "creation": "2017-07-25",
         "timespan": "P1Y5M8D"
+        "journal_sc": "no",
+        "author_sc": "no"
     },
     {
         "oci": "020010003083623142314271634370200010737010005-02001000002361013152237020001050005030208",
@@ -113,11 +140,13 @@ The fields returned by this operation are:
         "cited": "10.1002/adfm.201505328",
         "creation": "2017-07-10",
         "timespan": "P1Y4M23D"
+        "journal_sc": "no",
+        "author_sc": "no"
     }
 ]
-#field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan)
+#field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT ?oci ?citing ?cited ?creation ?timespan
+SELECT ?oci ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
 WHERE {
     GRAPH <https://w3id.org/oc/index/coci/> {
         BIND(<http://dx.doi.org/[[doi]]> as ?cited_iri) .
@@ -126,6 +155,17 @@ WHERE {
             cito:hasCitingEntity ?citing_iri ;
             cito:hasCitationCreationDate ?creation ;
             cito:hasCitationTimeSpan ?timespan .
+
+        OPTIONAL {
+            ?oci_iri a cito:JournalSelfCitation .
+            BIND("yes" as ?jsc)
+        }
+
+        OPTIONAL {
+            ?oci_iri a cito:AuthorSelfCitation .
+            BIND("yes" as ?asc)
+        }
+
         BIND(STRAFTER(str(?citing_iri), "http://dx.doi.org/") AS ?citing)
         BIND(STRAFTER(str(?cited_iri), "http://dx.doi.org/") AS ?cited)
         BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)
@@ -150,7 +190,9 @@ The fields returned by this operation are:
 * *citing*: the DOI of the citing entity;
 * *cited*: the DOI of the cited entity;
 * *creation*: the creation date of the citation according to the [ISO date format](https://en.wikipedia.org/wiki/ISO_8601) `YYYY-MM-DD`, which corresponds to the publication date of the citing entity;
-* *timespan*: the interval between the publication date of the cited entity and the publication date of the citing entity, expressed using the [XSD duration format](https://www.w3.org/TR/xmlschema11-2/#duration) `PnYnMnD`.
+* *timespan*: the interval between the publication date of the cited entity and the publication date of the citing entity, expressed using the [XSD duration format](https://www.w3.org/TR/xmlschema11-2/#duration) `PnYnMnD`;
+* *journal_sc*: it records whether the citation is a journal self-citations (i.e. the citing and the cited entities are published in the same journal);
+* *author_sc*: it records whether the citation is an author self-citation (i.e. the citing and the cited entities have at least one author in common).
 #call /citation/02001010806360107050663080702026306630509-0200101080636102704000806
 #output_json [
     {
@@ -161,9 +203,9 @@ The fields returned by this operation are:
         "timespan": "P1Y"
     }
 ]
-#field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan)
+#field_type str(oci) str(citing) str(cited) datetime(creation) duration(timespan) str(?journal_sc) str(?author_sc)
 #sparql PREFIX cito: <http://purl.org/spar/cito/>
-SELECT ?oci ?citing ?cited ?creation ?timespan
+SELECT ?oci ?citing ?cited ?creation ?timespan (IF(bound(?jsc), "yes", "no") as ?journal_sc) (IF(bound(?asc), "yes", "no") as ?author_sc)
 WHERE {
     GRAPH <https://w3id.org/oc/index/coci/> {
         BIND(<https://w3id.org/oc/index/coci/ci/[[oci]]> as ?oci_iri) .
@@ -172,6 +214,17 @@ WHERE {
             cito:hasCitedEntity ?cited_iri ;
             cito:hasCitationCreationDate ?creation ;
             cito:hasCitationTimeSpan ?timespan .
+
+        OPTIONAL {
+            ?oci_iri a cito:JournalSelfCitation .
+            BIND("yes" as ?jsc)
+        }
+
+        OPTIONAL {
+            ?oci_iri a cito:AuthorSelfCitation .
+            BIND("yes" as ?asc)
+        }
+
         BIND(STRAFTER(str(?citing_iri), "http://dx.doi.org/") AS ?citing)
         BIND(STRAFTER(str(?cited_iri), "http://dx.doi.org/") AS ?cited)
         BIND(STRAFTER(str(?oci_iri), "/ci/") AS ?oci)

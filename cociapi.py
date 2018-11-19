@@ -18,7 +18,7 @@ __author__ = 'essepuntato'
 from urllib.parse import quote, unquote
 from requests import get
 from rdflib import Graph, URIRef
-from rdflib.namespace import RDF, OWL, Namespace
+from re import sub
 from json import loads
 
 
@@ -77,14 +77,14 @@ def __get_issn(body):
     cur_id = ""
     if "ISSN" in body and len(body["ISSN"]):
         cur_id = "; ".join("issn:" + cur_issn for cur_issn in body["ISSN"])
-    return cur_id
+    return __normalise(cur_id)
 
 
 def __get_isbn(body):
     cur_id = ""
     if "ISBN" in body and len(body["ISBN"]):
         cur_id = "; ".join("isbn:" + cur_issn for cur_issn in body["ISBN"])
-    return cur_id
+    return __normalise(cur_id)
 
 
 def __get_id(body, f_list):
@@ -92,7 +92,25 @@ def __get_id(body, f_list):
     for f in f_list:
         if cur_id == "":
             cur_id = f(body)
-    return cur_id
+    return __normalise(cur_id)
+
+
+def __create_title_from_list(title_list):
+    cur_title = ""
+
+    for title in title_list:
+        strip_title = title.strip()
+        if strip_title != "":
+            if cur_title == "":
+                cur_title = strip_title
+            else:
+                cur_title += " - " + strip_title
+
+    return __normalise(cur_title.title())
+
+
+def __normalise(s):
+    return sub("\s+", " ", s).strip()
 
 
 def __crossref_parser(doi):
@@ -118,32 +136,32 @@ def __crossref_parser(doi):
                                 if "ORCID" in author:
                                     author_string += ", " + author["ORCID"].replace("http://orcid.org/", "")
                         if author_string is not None:
-                            authors.append(author_string)
+                            authors.append(__normalise(author_string))
 
                 year = ""
                 if "issued" in body and "date-parts" in body["issued"] and len(body["issued"]["date-parts"]) and \
                         len(body["issued"]["date-parts"][0]):
-                    year = str(body["issued"]["date-parts"][0][0])
+                    year = __normalise(str(body["issued"]["date-parts"][0][0]))
 
                 title = ""
                 if "title" in body:
-                    title = body["title"][0].title()
+                    title = __create_title_from_list(body["title"])
 
                 source_title = ""
                 if "container-title" in body:
-                    source_title = body["container-title"][0].title()
+                    source_title = __create_title_from_list(body["container-title"])
 
                 volume = ""
                 if "volume" in body:
-                    volume = body["volume"]
+                    volume = __normalise(body["volume"])
 
                 issue = ""
                 if "issue" in body:
-                    issue = body["issue"]
+                    issue = __normalise(body["issue"])
 
                 page = ""
                 if "page" in body:
-                    page = body["page"]
+                    page = __normalise(body["page"])
 
                 source_id = ""
                 if "type" in body:
