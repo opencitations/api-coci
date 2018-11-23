@@ -109,7 +109,11 @@ def __create_title_from_list(title_list):
     return __normalise(cur_title.title())
 
 
-def __normalise(s):
+def __normalise(o):
+    if o is None:
+        s = ""
+    else:
+        s = str(o)
     return sub("\s+", " ", s).strip()
 
 
@@ -141,7 +145,7 @@ def __crossref_parser(doi):
                 year = ""
                 if "issued" in body and "date-parts" in body["issued"] and len(body["issued"]["date-parts"]) and \
                         len(body["issued"]["date-parts"][0]):
-                    year = __normalise(str(body["issued"]["date-parts"][0][0]))
+                    year = __normalise(body["issued"]["date-parts"][0][0])
 
                 title = ""
                 if "title" in body:
