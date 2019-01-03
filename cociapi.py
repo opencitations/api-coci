@@ -57,6 +57,8 @@ def metadata(res, *args):
 
     header.extend(additional_fields)
 
+    rows_to_remove = []
+
     for row in res[1:]:
         citing_doi = row[doi_field][1]
 
@@ -65,10 +67,13 @@ def metadata(res, *args):
             if r is None:
                 r = p(citing_doi)
 
-        if r is None:
-            row.extend([""] * len(additional_fields))  # empty list
+        if r is None or all([i in ("", None) for i in r]):
+            rows_to_remove.append(row)
         else:
             row.extend(r)
+
+    for row in rows_to_remove:
+        res.remove(row)
 
     return res
 
